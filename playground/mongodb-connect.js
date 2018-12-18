@@ -10,8 +10,8 @@ MongoClient.connect(
     }
     console.log('Connected to TodoList');
 
-    db.collection('Todos').insertOne(
-      {text: 'something to do', completed: true},
+    db.collection('todos').insertOne(
+      {text: 'play soccer', completed: false},
       (err, res) => {
         if (err) {
           console.log('Unable to add collection', err);
@@ -21,7 +21,7 @@ MongoClient.connect(
     );
 
     //Add a user collection
-    db.collection('User').insertOne({name: 'andres', age: 33}, (err, res) => {
+    db.collection('users').insertOne({name: 'julio', age: 83}, (err, res) => {
       if (err) {
         console.log('Unable to add collection', err);
       }
