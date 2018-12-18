@@ -7,9 +7,9 @@ var { Todo } = require('./models/todo');
 var { User } = require('./models/user');
 
 //Set up production
-const port = process.env.PORT || 3000;
 
 var app = express();
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
