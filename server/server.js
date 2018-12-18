@@ -60,6 +60,8 @@ app.get('/todos/:id', (req, res) => {
 //  res.send({result});
 //});
 
-app.listen(port, () => console.log(`Listening at port ${port}`));
+app.listen(port, () => {
+	console.log(`Listening at port ${port}`);
+});
 
 module.exports = { app };
