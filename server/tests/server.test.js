@@ -104,3 +104,40 @@ describe('GET /todos/:id', () => {
 			.end(done);
 	});
 });
+
+describe('delete /todos/id route', () => {
+	it('Deletes a todo given an existent id', done => {
+		const id = todos[0]._id.toHexString();
+		request(app)
+			.delete(`/todos/${id}`)
+			.expect(200)
+			.expect(res => {
+				expect(res.body._id).toBe(id);
+			})
+			.end((err, res) => {
+				if (err) {
+					return done(err);
+				}
+				Todo.findById(id)
+					.then(res => {
+						expect(res).toBeFalsy();
+						done();
+					})
+					.catch(e => done(e));
+			});
+	});
+	it('Sends a 404 if the id is not valid', done => {
+		const id = 123;
+		request(app)
+			.delete(`/todos/${id}`)
+			.expect(404)
+			.end(done);
+	});
+	it('Sends a 404 if the id does not exist', done => {
+		const id = new ObjectID();
+		request(app)
+			.delete(`/todos/${id}`)
+			.expect(404)
+			.end(done);
+	});
+});
