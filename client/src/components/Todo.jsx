@@ -1,11 +1,29 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import styled from 'styled-components';
 
 import Schedule from '@material-ui/icons/Schedule';
 import Mood from '@material-ui/icons/Mood';
 import SentimentVeryDissatisfied from '@material-ui/icons/SentimentVeryDissatisfied';
 import Delete from '@material-ui/icons/Delete';
 import SystemUpdate from '@material-ui/icons/SystemUpdate';
+
+const H1 = styled.h1`
+	text-align: center
+	padding: 20px
+`;
+
+const P = styled.p`
+	text-transform: capitalize;
+`;
+
+const MaterialIcon = styled.i`
+	padding: 5px;
+`;
+const Button = styled.a`
+	margin: 10px
+	textAlign: center
+`;
 
 class Todo extends Component {
 	constructor(props) {
@@ -32,18 +50,14 @@ class Todo extends Component {
 
 	render() {
 		const { todo } = this.state;
-		const style = {
-			buttons: { margin: '10px', textAlign: 'center' },
-			i: { padding: '5px' }
-		};
 
 		return (
 			<div className="row">
 				<div className="col s12 m7">
 					<div className="card">
-						<h1 className="card-title">Todo</h1>
+						<H1 className="card-title">Todo</H1>
 						<div className="card-content">
-							<p>{todo.text}</p>
+							<P>{todo.text}</P>
 						</div>
 						<div className="card-action">
 							<span>
@@ -56,25 +70,21 @@ class Todo extends Component {
 								Scheduled...{' '}
 								{todo.completedAt ? todo.completedAt : <Schedule />}
 							</span>
-							<a
-								className="waves-effect waves-light btn-small"
-								style={style.buttons}
-							>
-								<i className="material-icons left" style={style.i}>
+							<Button className="waves-effect waves-light btn-small">
+								<MaterialIcon className="material-icons left">
 									<SystemUpdate />
-								</i>
+								</MaterialIcon>
 								Update
-							</a>
-							<a
+							</Button>
+							<Button
 								className="waves-effect waves-light btn-small"
-								style={style.buttons}
 								onClick={this.handleDelete}
 							>
-								<i className="material-icons left" style={style.i}>
+								<MaterialIcon className="material-icons left">
 									<Delete />
-								</i>
+								</MaterialIcon>
 								Delete
-							</a>
+							</Button>
 						</div>
 					</div>
 				</div>

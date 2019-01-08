@@ -114,7 +114,7 @@ describe('delete /todos/id route', () => {
 			.expect(res => {
 				expect(res.body._id).toBe(id);
 			})
-			.end((err, res) => {
+			.end(err => {
 				if (err) {
 					return done(err);
 				}
