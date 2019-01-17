@@ -1,9 +1,8 @@
 const expect = require('expect');
 const request = require('supertest');
 const { ObjectID } = require('mongodb');
-
 const { app } = require('./../server');
-const { Todo } = require('./../models/todo');
+const { todoModel } = require('./../app/models/todo');
 
 const todos = [
 	{
@@ -19,33 +18,32 @@ const todos = [
 ];
 
 beforeEach(done => {
-	Todo.remove({})
+	todoModel
+		.remove({})
 		.then(() => {
-			return Todo.insertMany(todos);
+			return todoModel.insertMany(todos);
 		})
 		.then(() => done());
 });
 
 describe('POST /todos', () => {
+	const text = 'Creating a new one';
 	it('should create a new todo', done => {
-		var text = 'Test todo text';
-
 		request(app)
 			.post('/todos')
-			.send({ text })
+			.send(`text=${text}`)
 			.expect(200)
 			.expect(res => {
-				expect(res.body.text).toBe(text);
+				expect(res.body.todo.text).toBe(`${text}`);
 			})
 			.end((err, res) => {
-				if (err) {
-					return done(err);
-				}
+				if (err) return done(err);
 
-				Todo.find()
+				todoModel
+					.find()
 					.then(todos => {
 						expect(todos.length).toBe(3);
-						expect(todos[2].text).toBe(text);
+						expect(todos[2].text).toBe(`${text}`);
 						done();
 					})
 					.catch(e => done(e));
@@ -55,14 +53,15 @@ describe('POST /todos', () => {
 	it('should not create todo with invalid body data', done => {
 		request(app)
 			.post('/todos')
-			.send({})
+			.send('text=')
 			.expect(400)
 			.end((err, res) => {
 				if (err) {
 					return done(err);
 				}
 
-				Todo.find()
+				todoModel
+					.find()
 					.then(todos => {
 						expect(todos.length).toBe(2);
 						done();
@@ -85,10 +84,10 @@ describe('POST /todos', () => {
 describe('GET /todos/:id', () => {
 	it('Shows a todo document', done => {
 		request(app)
-			.get(`/todos/${todos[0]._id.toHexString()}`)
+			.get(`/todos/${todos[1]._id.toHexString()}`)
 			.expect(200)
 			.expect(res => {
-				expect(res.body.todo.text).toBe(todos[0].text);
+				expect(res.body.todo.text).toBe(todos[1].text);
 			})
 			.end(done);
 	});
@@ -114,13 +113,14 @@ describe('delete /todos/id route', () => {
 			.delete(`/todos/${id}`)
 			.expect(200)
 			.expect(res => {
-				expect(res.body._id).toBe(id);
+				expect(res.body.todo._id).toBe(id);
 			})
 			.end(err => {
 				if (err) {
 					return done(err);
 				}
-				Todo.findById(id)
+				todoModel
+					.findById(id)
 					.then(res => {
 						expect(res).toBeFalsy();
 						done();
@@ -147,11 +147,11 @@ describe('delete /todos/id route', () => {
 describe('PATCH /todos', () => {
 	it('should update the todo', done => {
 		const text = 'Updating new text';
-		const hexId = todos[0]._id.toHexString();
 
 		request(app)
-			.patch(`/todos/${hexId}`)
-			.send({ completed: true, text })
+			.patch(`/todos/${todos[1]._id.toHexString()}`)
+			.send(`text=${text}`)
+			.send('completed=true')
 			.expect(200)
 			.expect(res => {
 				expect(res.body.todo.text).toBe(text);
@@ -166,7 +166,8 @@ describe('PATCH /todos', () => {
 
 		request(app)
 			.patch(`/todos/${hexId}`)
-			.send({ completed: false, text })
+			.send(`text=${text}`)
+			.send('completed=false')
 			.expect(200)
 			.expect(res => {
 				expect(res.body.todo.text).toBe(text);

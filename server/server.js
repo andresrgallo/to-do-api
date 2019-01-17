@@ -1,104 +1,68 @@
+require('dotenv').config();
+
 require('./config/config');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { ObjectID } = require('mongodb');
+var jwt = require('jsonwebtoken');
+const logger = require('morgan');
+
 const { mongoose } = require('./db/mongoose');
-const { Todo } = require('./models/todo');
-const { User } = require('./models/user');
-const _ = require('lodash');
+const todos = require('./routes/todos');
+const users = require('./routes/users');
 
 const app = express();
 const port = process.env.PORT;
 
-app.use(bodyParser.json());
+// connection to mongodb
+mongoose.connection.on(
+	'error',
+	console.error.bind(console, 'MongoDB connection error:')
+);
 
-app.post('/todos', (req, res) => {
-	console.log('at server', res);
-	var todo = new Todo({
-		text: req.body.text
+app.use(logger('dev'));
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.get('/', function(req, res) {
+	res.json({ Welcome: 'TODO RESTFUL application' });
+});
+
+// public route
+app.use('/users', users);
+
+// private route
+app.use('/todos', /*validateUser,*/ todos);
+
+app.get('/favicon.ico', function(req, res) {
+	res.sendStatus(204);
+});
+
+function validateUser(req, res, next) {
+	jwt.verify(req.headers['x-access-token'], process.env.JWT_SECRET, function(
+		err,
+		decoded
+	) {
+		if (err) {
+			res.json({ status: 'error', message: err.message, data: null });
+		} else {
+			// add user id to request
+			req.body.userId = decoded.id;
+			next();
+		}
 	});
+}
 
-	todo.save().then(
-		doc => {
-			res.send(doc);
-		},
-		e => {
-			res.status(400).send(e);
-		}
-	);
+//handle 404 error
+app.use(function(req, res, next) {
+	let err = new Error('Not Found');
+	err.status = 404;
+	next(err);
 });
 
-app.get('/todos', (req, res) => {
-	Todo.find().then(
-		todos => {
-			res.send({ todos });
-		},
-		e => {
-			res.status(400).send(e);
-		}
-	);
-});
-
-app.get('/todos/:id', (req, res) => {
-	var id = req.params.id;
-
-	if (!ObjectID.isValid(id)) {
-		return res.status(404).send();
-	}
-
-	Todo.findById(id)
-		.then(todo => {
-			if (!todo) {
-				return res.status(404).send();
-			}
-
-			res.send({ todo });
-		})
-		.catch(e => {
-			res.status(400).send();
-		});
-});
-
-app.delete('/todos/:id', (req, res) => {
-	const { id } = req.params;
-	if (!ObjectID.isValid(id)) {
-		return res.status(404).send();
-	}
-	Todo.findByIdAndDelete(id)
-		.then(todo => {
-			if (!todo) {
-				return res.status(404).send();
-			}
-			res.send(todo);
-		})
-		.catch(e => {
-			res.status(400).send();
-		});
-});
-
-app.patch('/todos/:id', (req, res) => {
-	const { id } = req.params;
-	const body = _.pick(req.body, ['text', 'completed']);
-	if (!ObjectID.isValid(id)) {
-		return res.status(404).send();
-	}
-
-	if (_.isBoolean(body.completed) && body.completed) {
-		body.completedAt = new Date().getTime();
-	} else {
-		body.completed = false;
-		body.completedAt = null;
-	}
-
-	Todo.findByIdAndUpdate(id, { $set: body }, { new: true })
-		.then(todo => {
-			if (!todo) {
-				return res.status(404).send();
-			}
-			res.send({ todo });
-		})
-		.catch(e => res.status(400).send());
+// // handle errors
+app.use(function(err, req, res, next) {
+	if (err.status === 404) res.status(404).json({ message: 'Not found' });
+	else res.status(400).send(err);
 });
 
 app.listen(port, () => {
