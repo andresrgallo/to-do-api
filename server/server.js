@@ -31,13 +31,14 @@ app.get('/', function(req, res) {
 app.use('/users', users);
 
 // private route
-app.use('/todos', /*validateUser,*/ todos);
+app.use('/todos', validateUser, todos);
 
 app.get('/favicon.ico', function(req, res) {
 	res.sendStatus(204);
 });
 
 function validateUser(req, res, next) {
+	console.log('headers....  ', req.headers['x-access-token']);
 	jwt.verify(req.headers['x-access-token'], process.env.JWT_SECRET, function(
 		err,
 		decoded
@@ -62,7 +63,7 @@ app.use(function(req, res, next) {
 // // handle errors
 app.use(function(err, req, res, next) {
 	if (err.status === 404) res.status(404).json({ message: 'Not found' });
-	else res.status(400).send(err);
+	else res.status(400).send({ error: 'email already exists!!' });
 });
 
 app.listen(port, () => {

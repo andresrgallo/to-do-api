@@ -22,6 +22,7 @@ module.exports = {
 	},
 
 	getAll: function(req, res, next) {
+		console.log('hi>>>>>', req.body);
 		todoModel.find().then(
 			todos => {
 				res.send({ todos });
@@ -35,6 +36,7 @@ module.exports = {
 	updateById: function(req, res, next) {
 		const { id } = req.params;
 		const body = _.pick(req.body, ['text', 'completed']);
+		console.log('hiiii', body);
 		body.completed = body.completed === 'true' ? true : false;
 		if (!ObjectID.isValid(id)) {
 			return res.status(404).send();

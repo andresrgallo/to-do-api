@@ -27,6 +27,7 @@ module.exports = {
 			if (err) {
 				next(err);
 			} else {
+				console.log('user info!!!!!', userInfo);
 				if (
 					userInfo != null &&
 					bcrypt.compareSync(req.body.password, userInfo.password)
@@ -35,18 +36,15 @@ module.exports = {
 					const token = jwt.sign({ id: userInfo._id }, process.env.JWT_SECRET, {
 						expiresIn: expiration_time
 					});
-
+					console.log('hello at authenticate server');
 					res.json({
 						status: 'success',
 						message: 'user found!!!',
 						data: { user: userInfo, token: token }
 					});
 				} else {
-					res.json({
-						status: 'error',
-						message: 'Invalid email/password!!!',
-						data: null
-					});
+					console.log('at error');
+					res.status(400).send(err);
 				}
 			}
 		});
