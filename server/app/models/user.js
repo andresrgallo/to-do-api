@@ -29,7 +29,8 @@ const UserSchema = new Schema({
 		type: String,
 		trim: true,
 		required: true
-	}
+	},
+	todos: [{ type: Schema.Types.ObjectId, ref: 'Todo' }]
 });
 
 UserSchema.pre('save', function(next) {

@@ -3,35 +3,17 @@ const request = require('supertest');
 const { ObjectID } = require('mongodb');
 const { app } = require('./../server');
 const { todoModel } = require('./../app/models/todo');
+const { todos, populateTodos } = require('./seeds/seeds');
+const qs = require('qs');
 
-const todos = [
-	{
-		_id: new ObjectID(),
-		text: 'first test todo'
-	},
-	{
-		_id: new ObjectID(),
-		text: 'second test todo',
-		completed: true,
-		completedAt: 333
-	}
-];
-
-beforeEach(done => {
-	todoModel
-		.remove({})
-		.then(() => {
-			return todoModel.insertMany(todos);
-		})
-		.then(() => done());
-});
+beforeEach(populateTodos);
 
 describe('POST /todos', () => {
 	const text = 'Creating a new one';
 	it('should create a new todo', done => {
 		request(app)
 			.post('/todos')
-			.send(`text=${text}`)
+			.send(qs.stringify({ text: text }))
 			.expect(200)
 			.expect(res => {
 				expect(res.body.todo.text).toBe(`${text}`);
@@ -166,7 +148,7 @@ describe('PATCH /todos', () => {
 
 		request(app)
 			.patch(`/todos/${hexId}`)
-			.send(`text=${text}`)
+			.send(qs.stringify({ text: text }))
 			.send('completed=false')
 			.expect(200)
 			.expect(res => {

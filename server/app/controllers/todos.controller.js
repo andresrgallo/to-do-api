@@ -5,6 +5,7 @@ const { ObjectID } = require('mongodb');
 module.exports = {
 	getById: function(req, res, next) {
 		const id = req.params.id;
+		console.log('server id', id);
 		if (!ObjectID.isValid(id)) {
 			return res.status(404).send();
 		}
@@ -22,8 +23,9 @@ module.exports = {
 	},
 
 	getAll: function(req, res, next) {
+		const user_id = req.body;
 		console.log('hi>>>>>', req.body);
-		todoModel.find().then(
+		todoModel.find({ userId: req.body.userId }).then(
 			todos => {
 				res.send({ todos });
 			},
@@ -85,7 +87,10 @@ module.exports = {
 	},
 
 	create: function(req, res, next) {
-		todoModel.create({ text: req.body.text }, function(err, todo) {
+		todoModel.create({ text: req.body.text, userId: req.body.userId }, function(
+			err,
+			todo
+		) {
 			if (err) next(err);
 			else
 				res.send({
