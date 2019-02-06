@@ -4,7 +4,7 @@ require('./config/config');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const logger = require('morgan');
 
 const { mongoose } = require('./db/mongoose');
@@ -31,7 +31,7 @@ app.get('/', function(req, res) {
 app.use('/users', users);
 
 // private route
-app.use('/todos', /*validateUser,*/ todos);
+app.use('/todos', validateUser, todos);
 
 app.get('/favicon.ico', function(req, res) {
 	res.sendStatus(204);

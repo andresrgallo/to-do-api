@@ -3,9 +3,10 @@ const request = require('supertest');
 const { ObjectID } = require('mongodb');
 const { app } = require('./../server');
 const { todoModel } = require('./../app/models/todo');
-const { todos, populateTodos } = require('./seeds/seeds');
+const { todos, populateTodos, users, populateUsers } = require('./seeds/seeds');
 const qs = require('qs');
 
+beforeEach(populateUsers);
 beforeEach(populateTodos);
 
 describe('POST /todos', () => {
@@ -13,7 +14,8 @@ describe('POST /todos', () => {
 	it('should create a new todo', done => {
 		request(app)
 			.post('/todos')
-			.send(qs.stringify({ text: text }))
+			.set('x-access-token', users[0].token)
+			.send(qs.stringify({ text: text, userId: users[0]._id }))
 			.expect(200)
 			.expect(res => {
 				expect(res.body.todo.text).toBe(`${text}`);
@@ -35,6 +37,7 @@ describe('POST /todos', () => {
 	it('should not create todo with invalid body data', done => {
 		request(app)
 			.post('/todos')
+			.set('x-access-token', users[0].token)
 			.send('text=')
 			.expect(400)
 			.end((err, res) => {
@@ -51,13 +54,16 @@ describe('POST /todos', () => {
 					.catch(e => done(e));
 			});
 	});
+});
 
+describe('Get /todos', () => {
 	it('Shows a list of todos', done => {
 		request(app)
 			.get('/todos')
+			.set('x-access-token', users[0].token)
 			.expect(200)
 			.expect(res => {
-				expect(res.body.todos.length).toBe(2);
+				expect(res.body.todos.length).toBe(1);
 			})
 			.end(done);
 	});
@@ -67,6 +73,7 @@ describe('GET /todos/:id', () => {
 	it('Shows a todo document', done => {
 		request(app)
 			.get(`/todos/${todos[1]._id.toHexString()}`)
+			.set('x-access-token', users[0].token)
 			.expect(200)
 			.expect(res => {
 				expect(res.body.todo.text).toBe(todos[1].text);
@@ -77,12 +84,14 @@ describe('GET /todos/:id', () => {
 		var id = new ObjectID();
 		request(app)
 			.get(`/todos/${id.toHexString()}`)
+			.set('x-access-token', users[0].token)
 			.expect(404)
 			.end(done);
 	});
 	it('Returns 404 for not valid ids', done => {
 		request(app)
 			.get(`/todos/s23`)
+			.set('x-access-token', users[0].token)
 			.expect(404)
 			.end(done);
 	});
@@ -93,6 +102,7 @@ describe('delete /todos/id route', () => {
 		const id = todos[0]._id.toHexString();
 		request(app)
 			.delete(`/todos/${id}`)
+			.set('x-access-token', users[0].token)
 			.expect(200)
 			.expect(res => {
 				expect(res.body.todo._id).toBe(id);
@@ -114,6 +124,7 @@ describe('delete /todos/id route', () => {
 		const id = 123;
 		request(app)
 			.delete(`/todos/${id}`)
+			.set('x-access-token', users[0].token)
 			.expect(404)
 			.end(done);
 	});
@@ -121,6 +132,7 @@ describe('delete /todos/id route', () => {
 		const id = new ObjectID();
 		request(app)
 			.delete(`/todos/${id}`)
+			.set('x-access-token', users[0].token)
 			.expect(404)
 			.end(done);
 	});
@@ -131,7 +143,8 @@ describe('PATCH /todos', () => {
 		const text = 'Updating new text';
 
 		request(app)
-			.patch(`/todos/${todos[1]._id.toHexString()}`)
+			.patch(`/todos/${todos[0]._id.toHexString()}`)
+			.set('x-access-token', users[0].token)
 			.send(`text=${text}`)
 			.send('completed=true')
 			.expect(200)
@@ -144,10 +157,11 @@ describe('PATCH /todos', () => {
 	});
 	it('should not have a completed at date when todo completed set to false', done => {
 		const text = 'Updating another text';
-		const hexId = todos[1]._id.toHexString();
+		const hexId = todos[0]._id.toHexString();
 
 		request(app)
 			.patch(`/todos/${hexId}`)
+			.set('x-access-token', users[0].token)
 			.send(qs.stringify({ text: text }))
 			.send('completed=false')
 			.expect(200)
