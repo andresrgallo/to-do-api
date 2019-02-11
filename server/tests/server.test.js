@@ -3,6 +3,7 @@ const request = require('supertest');
 const { ObjectID } = require('mongodb');
 const { app } = require('./../server');
 const { todoModel } = require('./../app/models/todo');
+const { userModel } = require('./../app/models/user');
 const { todos, populateTodos, users, populateUsers } = require('./seeds/seeds');
 const qs = require('qs');
 
@@ -170,6 +171,57 @@ describe('PATCH /todos', () => {
 				expect(res.body.todo.completed).toBe(false);
 				expect(res.body.todo.completedAt).toBeFalsy();
 			})
+			.end(done);
+	});
+});
+describe('POST users/register', () => {
+	it('should register a user', done => {
+		const name = 'alex';
+		const email = 'alex@sam.com';
+		const password = 'password';
+		request(app)
+			.post('/users/register')
+			.send(qs.stringify({ name, email, password }))
+			.expect(200)
+			.expect(res => {
+				expect(res.body.data.result.name).toBe(`${name}`);
+			})
+			.end((err, res) => {
+				if (err) return done(err);
+
+				userModel
+					.find()
+					.then(users => {
+						expect(users.length).toBe(3);
+						expect(users[2].email).toBe(`${email}`);
+						done();
+					})
+					.catch(e => done(e));
+			});
+	});
+	it('should return 400 when email account already exists', done => {
+		const name = 'Carlos';
+		const email = 'car@sam.com';
+		const password = 'password';
+		request(app)
+			.post('/users/register')
+			.send(qs.stringify({ name, email, password }))
+			.expect(400)
+			.end(done);
+	});
+});
+describe('POST users/login', () => {
+	it('Should login a registered user', done => {
+		const name = users[0].name;
+		const email = users[0].email;
+		const password = users[0].password;
+
+		request(app)
+			.post('/users/login')
+			.send(qs.stringify({ name, email, password }))
+			.expect(200)
+			.expect(res => expect(res.body.data.user.name).toBe('Carlos'))
+			.expect(res => expect(res.body.data.token).toBeTruthy())
 			.end(done);
 	});
 });

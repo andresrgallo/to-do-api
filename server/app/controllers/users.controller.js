@@ -11,12 +11,13 @@ module.exports = {
 				password: req.body.password
 			},
 			function(err, result) {
+				console.log('rrrr');
 				if (err) next(err);
 				else
 					res.json({
 						status: 'success',
 						message: 'User added successfully!!!',
-						data: null
+						data: { result }
 					});
 			}
 		);
