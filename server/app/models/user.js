@@ -34,6 +34,7 @@ const UserSchema = new Schema({
 });
 
 UserSchema.pre('save', function(next) {
+	console.log('hi new password');
 	this.password = bcrypt.hashSync(this.password, saltRounds);
 	next();
 });

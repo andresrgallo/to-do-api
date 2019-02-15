@@ -7,8 +7,9 @@ const TodoSchema = new Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User'
 	},
+	createdAt: { type: Date, default: null },
 	completed: { type: Boolean, default: false },
-	completedAt: { type: Number, default: null }
+	completedAt: { type: Date, default: null }
 });
 
 let todoModel = mongoose.model('Todo', TodoSchema);

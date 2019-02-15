@@ -46,6 +46,7 @@ function validateUser(req, res, next) {
 		if (err) {
 			res.json({ status: 'error', message: err.message, data: null });
 		} else {
+			console.log('decoded', decoded);
 			// add user id to request
 			req.body.userId = decoded.id;
 			console.log('rebody after...', req.body);

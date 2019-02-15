@@ -5,7 +5,6 @@ const { ObjectID } = require('mongodb');
 module.exports = {
 	getById: function(req, res, next) {
 		const id = req.params.id;
-		console.log('server id', id);
 		if (!ObjectID.isValid(id)) {
 			return res.status(404).send();
 		}
@@ -23,8 +22,6 @@ module.exports = {
 	},
 
 	getAll: function(req, res, next) {
-		const user_id = req.body;
-		console.log('hi>>>>>', req.body);
 		todoModel.find({ userId: req.body.userId }).then(
 			todos => {
 				res.send({ todos });
@@ -38,7 +35,6 @@ module.exports = {
 	updateById: function(req, res, next) {
 		const { id } = req.params;
 		const body = _.pick(req.body, ['text', 'completed']);
-		console.log('hiiii', body);
 		body.completed = body.completed === 'true' ? true : false;
 		if (!ObjectID.isValid(id)) {
 			return res.status(404).send();
@@ -57,7 +53,6 @@ module.exports = {
 				if (!todo) {
 					return res.status(404).send();
 				}
-
 				res.send({ todo });
 			})
 			.catch(e => {
@@ -87,15 +82,16 @@ module.exports = {
 	},
 
 	create: function(req, res, next) {
-		todoModel.create({ text: req.body.text, userId: req.body.userId }, function(
-			err,
-			todo
-		) {
-			if (err) next(err);
-			else
-				res.send({
-					todo
-				});
-		});
+		const theDate = new Date().getTime();
+		todoModel.create(
+			{ text: req.body.text, userId: req.body.userId, createdAt: theDate },
+			function(err, todo) {
+				if (err) next(err);
+				else
+					res.send({
+						todo
+					});
+			}
+		);
 	}
 };
