@@ -3,7 +3,9 @@
 ## Application Overview
 
 This application was developed with the purpose of improving my skills on NodeJs. The API was build using a RESTFUL architecture and Tested with Jest and Supertest libraries.
-Mongodb was the database of choice with Mongoose as the ODM library to manage the data. A one to many relationship between User model and To-do model was used in order to enable each user to have unique to-dos. The Front end of the Application was built using the React library and the repository can be cloned at:
+Mongodb was the database of choice with Mongoose as the ODM library to manage the data. A one to many relationship between User model and To-do model was used in order to enable each user to have unique to-dos.
+For password security, the library bcrypt was installed. JWT library was used to generate tokens to validate and authenticate users, in order to permit the listing, creation, update and deletion of their own to-dos.
+The Front end of the Application was built using the React library and the repository can be cloned at:
 
 [https://github.com/andresrgallo/to-do-client.git](https://github.com/andresrgallo/to-do-client.git)
 
