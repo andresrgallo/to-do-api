@@ -38,7 +38,7 @@ app.get('/favicon.ico', function(req, res) {
 });
 
 function validateUser(req, res, next) {
-	console.log('headers....  ', req.headers['x-access-token']);
+	//console.log('headers....  ', req.headers['x-access-token']);
 	jwt.verify(req.headers['x-access-token'], process.env.JWT_SECRET, function(
 		err,
 		decoded
@@ -49,7 +49,6 @@ function validateUser(req, res, next) {
 			console.log('decoded', decoded);
 			// add user id to request
 			req.body.userId = decoded.id;
-			console.log('rebody after...', req.body);
 			next();
 		}
 	});
@@ -66,7 +65,6 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
 	if (err.status === 404) res.status(404).json({ message: 'Not found' });
 	else res.status(400).send(err);
-	//else res.status(400).send({ error: 'email already exists!!' });
 });
 
 app.listen(port, () => {
