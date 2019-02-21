@@ -6,6 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const logger = require('morgan');
+const cors = require('cors');
 
 const { mongoose } = require('./db/mongoose');
 const todos = require('./routes/todos');
@@ -20,6 +21,7 @@ mongoose.connection.on(
 	console.error.bind(console, 'MongoDB connection error:')
 );
 
+app.use(cors({ origin: '*' }));
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -38,7 +40,6 @@ app.get('/favicon.ico', function(req, res) {
 });
 
 function validateUser(req, res, next) {
-	//console.log('headers....  ', req.headers['x-access-token']);
 	jwt.verify(req.headers['x-access-token'], process.env.JWT_SECRET, function(
 		err,
 		decoded
@@ -46,7 +47,6 @@ function validateUser(req, res, next) {
 		if (err) {
 			res.json({ status: 'error', message: err.message, data: null });
 		} else {
-			console.log('decoded', decoded);
 			// add user id to request
 			req.body.userId = decoded.id;
 			next();

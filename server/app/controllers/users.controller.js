@@ -13,7 +13,6 @@ module.exports = {
 				password: req.body.password
 			},
 			function(err, result) {
-				console.log('rrrr');
 				if (err) next(err);
 				else
 					res.json({
@@ -30,7 +29,6 @@ module.exports = {
 			if (err) {
 				next(err);
 			} else {
-				console.log('user info!!!!!', userInfo);
 				if (
 					userInfo != null &&
 					bcrypt.compareSync(req.body.password, userInfo.password)
@@ -39,14 +37,12 @@ module.exports = {
 					const token = jwt.sign({ id: userInfo._id }, process.env.JWT_SECRET, {
 						expiresIn: expiration_time
 					});
-					console.log('hello at authenticate server');
 					res.json({
 						status: 'success',
 						message: 'user found!!!',
 						data: { user: userInfo, token: token }
 					});
 				} else {
-					console.log('at error');
 					res.status(400).send(err);
 				}
 			}
@@ -77,7 +73,7 @@ module.exports = {
 							});
 							let mailOptions = {
 								from: process.env.EMAIL_COMPANY,
-								to: process.env.EMAIL_USER,
+								to: user.email,
 								replyTo: process.env.EMAIL_COMPANY,
 								subject: 'From the Todo App: Password Reset',
 								text:
@@ -100,7 +96,7 @@ module.exports = {
 					return res.status(404).send({ error: 'Email not found' });
 				}
 			})
-			.catch(e => console.log('errrr', e));
+			.catch(e => console.log('error', e));
 	},
 	update: function(req, res, next) {
 		userModel
@@ -113,15 +109,18 @@ module.exports = {
 					res.json({
 						status: 'success'
 					});
+				} else {
+					res.status(404).send({
+						status: 'Old password does not match'
+					});
 				}
 				user.password = req.body.newPassword;
 				user
 					.save()
 					.then(() => console.log('ok'))
-					.catch(e => console.log('at first catch', e));
+					.catch(e => console.log(e));
 			})
 			.catch(err => {
-				console.log('at second');
 				return next(err);
 			});
 	}
