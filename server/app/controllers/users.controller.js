@@ -58,7 +58,7 @@ module.exports = {
 					res.json({
 						status: 'success'
 					});
-					user.password = newPass;
+					user.code = newPass;
 					user
 						.save()
 						.then(done => {
@@ -78,9 +78,12 @@ module.exports = {
 								subject: 'From the Todo App: Password Reset',
 								text:
 									'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-									'Please use the following password to log into our account.  To create your own password go to profile at the top menu\n\n' +
-									'Your new password is: ' +
+									'Please enter the following temporary password in the link provided.  After entering the password you will be redirected to your profile page where you can enter a new password\n\n' +
+									'Your temporary password is: ' +
 									newPass +
+									'\n\n' +
+									'Click the following link or paste this into your browser where you can enter the code provided\n\n' +
+									'http://localhost:3000/reset-password' +
 									'\n\n' +
 									'If you did not request this, please ignore this email and your password will remain unchanged.\n'
 								// html: htmlEmail
@@ -98,6 +101,30 @@ module.exports = {
 			})
 			.catch(e => console.log('error', e));
 	},
+
+	resetPassword: function(req, res, next) {
+		userModel
+			.findOne({ code: req.body.code })
+			.then(user => {
+				console.log('reset user', user);
+				if (user != null) {
+					console.log('hi reset serv', req.body);
+					res.json({
+						status: 'success'
+					});
+					user.password = req.body.code;
+					user
+						.save()
+						.then(() => console.log('Succesfully reset password'))
+						.catch(e => console.log('reset password error', e));
+				} else {
+					console.log('something wrong');
+					return res.status(404).send({ error: 'wrong password' });
+				}
+			})
+			.catch(e => console.log('wrong temp password', e));
+	},
+
 	update: function(req, res, next) {
 		userModel
 			.findOne({ email: req.body.email })
@@ -115,6 +142,7 @@ module.exports = {
 					});
 				}
 				user.password = req.body.newPassword;
+				user.code = '';
 				user
 					.save()
 					.then(() => console.log('ok'))

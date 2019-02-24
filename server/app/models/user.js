@@ -30,11 +30,14 @@ const UserSchema = new Schema({
 		trim: true,
 		required: true
 	},
+	code: {
+		type: String,
+		trim: true
+	},
 	todos: [{ type: Schema.Types.ObjectId, ref: 'Todo' }]
 });
 
 UserSchema.pre('save', function(next) {
-	console.log('hi new password');
 	this.password = bcrypt.hashSync(this.password, saltRounds);
 	next();
 });
