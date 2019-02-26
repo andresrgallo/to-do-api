@@ -9,6 +9,7 @@ const UserSchema = new Schema({
 	name: {
 		type: String,
 		trim: true,
+		minlength: 2,
 		required: true
 	},
 	email: {
@@ -28,6 +29,7 @@ const UserSchema = new Schema({
 	password: {
 		type: String,
 		trim: true,
+		minlength: 5,
 		required: true
 	},
 	code: {

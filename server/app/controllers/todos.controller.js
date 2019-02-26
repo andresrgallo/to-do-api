@@ -86,8 +86,10 @@ module.exports = {
 		todoModel.create(
 			{ text: req.body.text, userId: req.body.userId, createdAt: theDate },
 			function(err, todo) {
-				if (err) next(err);
-				else
+				if (err) {
+					console.log('errrrrr', err.errors.text.message);
+					next(err);
+				} else
 					res.send({
 						todo
 					});
